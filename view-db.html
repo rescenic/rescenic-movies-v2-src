@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Rescenic.MovieDB v2</title>
+
+  <!-- CDN Meilisearch -->
+  <link rel="stylesheet" href="assets/algolia-min.css" />
+  <!-- <link rel="stylesheet" href="assets/basic_search.css" /> -->
+
+  <!---CDN AJAX-->
+  <script src="assets/jquery@v3.6.3/jquery.min.js"
+    integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- CDN BootStrap -->
+  <link rel="stylesheet" href="assets/bootstrap@v4.6.2.css/bootstrap.min.css"
+    integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+
+  <script src="assets/bootstrap@v4.6.2.js/bootstrap.bundle.min.js"
+    integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous">
+    </script>
+
+  <!-- Custom Favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
+  <link rel="manifest" href="assets/favicon/site.webmanifest">
+  <link rel="mask-icon" href="assets/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <div id="searchbox"></div>
+    <div id="hits"></div>
+    <div id="pagination"></div>
+  </div>
+
+  <script src="assets/instant-meilisearch@v0.11.0/instant-meilisearch.umd.min.js">
+  </script>
+  <script src="assets/instantsearch.js@v4.51.0/instantsearch.js@4.js"></script>
+  <script src="assets/instantsearch.js@v4.51.0/instantsearch.production.min.js"></script>
+
+  <script>
+    const search = instantsearch({
+      indexName: "movies",
+      searchClient: instantMeiliSearch(
+        "http://localhost:7700", "apiKey"
+      )
+    });
+
+    search.addWidgets([
+      instantsearch.widgets.searchBox({
+        container: "#searchbox",
+      }),
+      instantsearch.widgets.configure({
+        hitsPerPage: 12,
+        snippetEllipsisText: "...",
+        attributesToSnippet: ["overview:100"]
+      }),
+      instantsearch.widgets.hits({
+        container: "#hits",
+        templates: {
+          item: `
+            <div>
+              <div>
+                <div class="hit-poster text-center">
+                  <img src="{{{_highlightResult.poster.value}}}" alt="{{{_highlightResult.title.value}}}" style="width:200px;"/>
+                </div>
+                <div class="hit-name">
+                  <b>{{#helpers.highlight}}{ "attribute": "title" }{{/helpers.highlight}}</b>
+                </div>
+                <div class="hit-overview">
+                  {{#helpers.snippet}}{ "attribute": "overview", "highlightedTagName": "mark" }{{/helpers.snippet}}
+                </div>
+              </div>
+            </div>
+          `
+        }
+      }),
+      instantsearch.widgets.pagination({
+        container: "#pagination",
+        scrollTo: "#searchbox",
+        showFirst: true,
+        showLast: true,
+        padding: 3,
+        templates: {
+          previous: '<span>Previous</span>',
+          next: '<span>Next</span>',
+        },
+      }),
+    ]);
+
+    search.start();
+  </script>
+
+</body>
+
+</html>
